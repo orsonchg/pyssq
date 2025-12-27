@@ -1,0 +1,29 @@
+# Django local settings
+pyssqv2/local_settings.py
+
+# 其他常见忽略项
+*.log
+*.pyc
+__pycache__/
+db.sqlite3
+db.sqlite3-journal
+media/
+static/
+.idea/
+.vscode/
+.env
+.env.*
+.venv/
+secrets.json
+credentials.ino
+
+# Django会话/缓存文件
+django_debug/
+session/
+cache/
+
+# 部署相关
+.ssh/
+.pem
+*.key
+
