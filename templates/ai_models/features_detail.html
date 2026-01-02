@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+{% block title %}特征详情{% endblock %}
+{% block content %}
+<!-- 主容器 - 响应式内边距 -->
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <!-- 返回按钮 -->
+            <div class="mb-4">
+                <a href="javascript:history.back()" class="btn btn-outline-secondary btn-sm">
+                    <i class="fas fa-arrow-left me-1"></i> 返回列表
+                </a>
+            </div>
+
+            <!-- 详情卡片 - 优化阴影和圆角 -->
+            <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+                <div class="card-header bg-white border-bottom border-secondary border-opacity-10 py-4">
+                    <h5 class="mb-0 fw-semibold">
+                        <i class="fas fa-database text-primary me-2"></i>特征数据详情
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <!-- 基础信息区域 -->
+                    <div class="mb-5">
+                        <h4 class="card-title fw-bold mb-2">{{ feature_set.name }}</h4>
+                        <p class="text-muted mb-0">{{ feature_set.description|default:"无描述信息" }}</p>
+                    </div>
+
+                    <!-- 核心指标行 - 卡片式布局 -->
+                    <div class="row g-4 mb-6">
+                        <div class="col-md-4">
+                            <div class="bg-light rounded-3 p-3 h-100">
+                                <small class="text-muted d-block mb-1">期号范围</small>
+                                <div class="fw-medium">
+                                    <span class="badge bg-primary-subtle text-primary px-2 py-1 me-2">{{ feature_set.period_start }}</span>
+                                    <i class="fas fa-arrow-right text-muted mx-1"></i>
+                                    <span class="badge bg-primary-subtle text-primary px-2 py-1 ms-2">{{ feature_set.period_end }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="bg-light rounded-3 p-3 h-100">
+                                <small class="text-muted d-block mb-1">样本数量</small>
+                                <div class="fw-medium fs-5 text-primary">{{ feature_set.sample_count }}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="bg-light rounded-3 p-3 h-100">
+                                <small class="text-muted d-block mb-1">创建时间</small>
+                                <div class="fw-medium">{{ feature_set.created_at|date:'Y-m-d H:i' }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 数据预览区域 -->
+                    <div class="border-top pt-4">
+                        <h6 class="mb-4 fw-semibold">
+                            <i class="fas fa-table text-primary me-2"></i>数据预览（最多20个样本）
+                        </h6>
+
+                        {% if sample_list %}
+                            <!-- 循环渲染所有样本 -->
+                            {% for sample in sample_list|slice:":10" %}  <!-- 只显示前10个 -->
+                                <div class="sample-card bg-white border border-secondary border-opacity-10 rounded-3 p-4 mb-3">
+                                    <div class="sample-period mb-3 fw-medium text-secondary">
+                                        第{{ sample.features.period }}期 → 第{{ sample.targets.next_period }}期
+                                    </div>
+                                    <div class="row g-3">
+                                        <!-- 特征值列 -->
+                                        <div class="col-md-6">
+                                            <small class="text-primary d-block mb-2 fw-medium">特征值:</small>
+                                            <div class="bg-primary bg-opacity-5 rounded-2 p-2">
+                                                {% for key, value in sample.features.items %}
+                                                    <span class="badge bg-primary-subtle text-primary me-2 mb-1">
+                                                        {{ key }}: {{ value }}
+                                                    </span>
+                                                {% empty %}
+                                                    <span class="text-muted">无特征值数据</span>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                        <!-- 目标值列 -->
+                                        <div class="col-md-6">
+                                            <small class="text-success d-block mb-2 fw-medium">目标值:</small>
+                                            <div class="bg-success bg-opacity-5 rounded-2 p-2">
+                                                {% for key, value in sample.targets.items %}
+                                                    <span class="badge bg-success-subtle text-success me-2 mb-1">
+                                                        {{ key }}: {{ value }}
+                                                    </span>
+                                                {% empty %}
+                                                    <span class="text-muted">无目标值数据</span>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+
+                            <!-- 更多样本折叠面板 -->
+                            {% if sample_list|length > 10 %}
+                                <div class="mt-3">
+                                    <button class="btn btn-outline-secondary btn-sm" type="button"
+                                            data-bs-toggle="collapse" data-bs-target="#moreSamples"
+                                            aria-expanded="false" aria-controls="moreSamples">
+                                        <i class="fas fa-chevron-down me-1"></i> 查看更多{{ sample_list|length|add:"-10" }}个样本
+                                    </button>
+                                    <div class="collapse mt-3" id="moreSamples">
+                                        <div class="card card-body border-0 bg-light rounded-3">
+                                            {% for sample in sample_list|slice:"10:" %}
+                                                <div class="sample-card bg-white border border-secondary border-opacity-10 rounded-3 p-4 mb-3">
+                                                    <div class="sample-period mb-3 fw-medium text-secondary">
+                                                        第{{ sample.features.period }}期 → 第{{ sample.targets.next_period }}期
+                                                    </div>
+                                                    <div class="row g-3">
+                                                        <div class="col-md-6">
+                                                            <small class="text-primary d-block mb-2 fw-medium">特征值:</small>
+                                                            <div class="bg-primary bg-opacity-5 rounded-2 p-2">
+                                                                {% for key, value in sample.features.items %}
+                                                                    <span class="badge bg-primary-subtle text-primary me-2 mb-1">
+                                                                        {{ key }}: {{ value }}
+                                                                    </span>
+                                                                {% endfor %}
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <small class="text-success d-block mb-2 fw-medium">目标值:</small>
+                                                            <div class="bg-success bg-opacity-5 rounded-2 p-2">
+                                                                {% for key, value in sample.targets.items %}
+                                                                    <span class="badge bg-success-subtle text-success me-2 mb-1">
+                                                                        {{ key }}: {{ value }}
+                                                                    </span>
+                                                                {% endfor %}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        {% else %}
+                            <!-- 空状态提示 -->
+                            <div class="alert alert-warning border-0 bg-warning-subtle text-warning rounded-3">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                暂无特征数据可供预览（请检查期号范围是否有足够的开奖记录）
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

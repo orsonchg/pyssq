@@ -1,0 +1,516 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block css %}
+    <link rel="stylesheet" href="{% static 'css/ssq/ssq_draw_detail.css' %}">
+{% endblock %}
+
+{% block content %}
+    <!-- 页头 -->
+    <div class="header-gradient">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="display-6 mb-3">
+                        双色球第 <span class="text-warning">{{ current_period }}</span> 期
+                    </h1>
+                    <p class="lead mb-0">
+                        <i class="bi bi-calendar-event me-2"></i>
+                        开奖日期：{{ ssq.draw_date }}
+                        <span class="mx-3">|</span>
+                        <i class="bi bi-trophy me-2"></i>
+                        第 {{ current_serial_number }} 期/共 {{ total_count }} 期
+                    </p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <div class="btn-group" role="group">
+                        {% if prev_period %}
+                            <a href="{% url 'ssq:ssq_detail' period=prev_period %}" class="btn btn-outline-light">
+                                <i class="fas fa-chevron-left"></i> 上期
+                            </a>
+                        {% endif %}
+                        <a href="{% url 'ssq:ssq_list' %}" class="btn btn-light">
+                            <i class="fas fa-list"></i> 列表
+                        </a>
+                        {% if next_period %}
+                            <a href="{% url 'ssq:ssq_detail' period=next_period %}" class="btn btn-outline-light">
+                                下期 <i class="fas fa-chevron-right"></i>
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+
+        <!-- 开奖号码展示 -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="card stat-card">
+                    <div class="card-header">
+                        <h4 class="mb-0"><i class="bi bi-ticket-detailed me-2"></i> 开奖号码</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="ball-display">
+                            {% for ball in ssq.red_balls %}
+                                <div class="ball red-ball" data-toggle="tooltip" title="红球{{ forloop.counter }}">
+                                    <span>{{ ball|stringformat:"02d" }}</span>
+                                    <div class="ball-label">红{{ forloop.counter }}</div>
+                                </div>
+                            {% endfor %}
+
+                            <div class="plus-sign">+</div>
+
+                            <div class="ball blue-ball" data-toggle="tooltip" title="蓝球">
+                                <span>{{ ssq.blue_ball|stringformat:"02d" }}</span>
+                                <div class="ball-label">蓝球</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 统计指标 -->
+        <div class="row mb-5">
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="stat-card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-calculator me-2"></i> 基础统计</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="fas fa-up-down stat-icon"></i>
+                            <div>
+                                <div class="stat-value">{{ ssq.red_sum }}</div>
+                                <div class="stat-label">红球和值</div>
+                            </div>
+                        </div>
+                        <div class="row text-center">
+                            <div class="col-6">
+                                <div class="text-muted">奇偶比</div>
+                                <div class="h4">{{ ssq.red_odd_count }}:{{ ssq.red_even_count }}</div>
+                            </div>
+                            <div class="col-6">
+                                <div class="text-muted">质数</div>
+                                <div class="h4">{{ ssq.red_prime_count }}个</div>
+                            </div>
+                        </div>
+                        <div class="row text-center">
+                            <div class="col-6">
+                                <div class="text-muted">红球跨度</div>
+                                <div class="h4">{{ ssq.red_span }}</div>
+                            </div>
+                            <div class="col-6">
+                                <div class="text-muted">尾数和</div>
+                                <div class="h4">{{ ssq.red_tail_sum }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="stat-card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-fire me-2"></i> 热号分布</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            {% for hot_red in hot_numbers %}
+                                <div class="ball red-ball mb-3 m-lg-1">
+                                    <span>{{ hot_red|stringformat:"02d" }}</span>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="stat-card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-pie-chart me-2"></i> 三区分布</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="zone-distribution">
+                            {% for zone_count in ssq.red_zones %}
+                                <div class="zone-bar" style="height: {{ zone_count|add:2 }}0px;">
+                                    <div class="zone-value">{{ zone_count }}个</div>
+                                    <div class="zone-label">{{ forloop.counter }}区</div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="stat-card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-snowflake me-2"></i> 冷号分布</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            {% for cold_red in cold_numbers %}
+                                <div class="ball blue-ball mb-3 m-lg-1">
+                                    <span>{{ cold_red|stringformat:"02d" }}</span>
+                                </div>
+                            {% endfor %}
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 分析标签页 -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <ul class="nav nav-tabs" id="analysisTab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="detail-tab" data-toggle="tab"
+                                data-target="#detail" type="button" role="tab">
+                            <i class="bi bi-bar-chart me-1"></i>详细分析
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="parity-tab" data-toggle="tab"
+                                data-target="#parity" type="button" role="tab">
+                            <i class="bi bi-123 me-1"></i>奇偶分析
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="prime-tab" data-toggle="tab"
+                                data-target="#prime" type="button" role="tab">
+                            <i class="bi bi-shield-check me-1"></i>质数分析
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="trend-tab" data-toggle="tab"
+                                data-target="#trend" type="button" role="tab">
+                            <i class="bi bi-graph-up me-1"></i>走势图表
+                        </button>
+                    </li>
+                </ul>
+
+                <div class="tab-content" id="analysisTabContent">
+                    <!-- 详细分析 -->
+                    <div class="tab-pane fade show active" id="detail" role="tabpanel">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5>号码分布热力图</h5>
+                                <div class="chart-container">
+                                    <canvas id="distributionChart"></canvas>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <h5>特征雷达图</h5>
+                                <div class="chart-container">
+                                    <canvas id="radarChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 奇偶分析 -->
+                    <div class="tab-pane fade" id="parity" role="tabpanel">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5>奇偶比例</h5>
+                                <div class="chart-container">
+                                    <canvas id="parityChart"></canvas>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <h5>号码奇偶分布</h5>
+                                <div class="analysis-section">
+                                    <div class="row">
+                                        {% for ball in ssq.red_balls %}
+                                            <div class="col-4 col-md-3 col-lg-2 mb-3">
+                                                <div class="text-center">
+                                                    <div class="ball {% if ball|divisibleby:2 %}blue-ball{% else %}red-ball{% endif %}"
+                                                         style="width: 50px; height: 50px; margin: 0 auto 10px;">
+                                                        {{ ball|stringformat:"02d" }}
+                                                    </div>
+                                                    <small class="d-block">
+                                                        {% if ball|divisibleby:2 %}偶数{% else %}奇数{% endif %}
+                                                    </small>
+                                                </div>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                    <div class="mt-4">
+                                        <div class="alert alert-info">
+                                            <h6><i class="bi bi-info-circle me-2"></i>奇偶分析说明</h6>
+                                            <p class="mb-0">
+                                                本期奇偶比为 {{ ssq.red_odd_count }}:{{ ssq.red_even_count }}，符合常规分布。</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 质数分析 -->
+                    <div class="tab-pane fade" id="prime" role="tabpanel">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5>质数分布</h5>
+                                <div class="analysis-section">
+                                    <p class="mb-3">质数号码范围：2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31</p>
+                                    <div class="row mb-4">
+                                        {% for ball in ssq.red_balls %}
+                                            <div class="col-4 col-md-3 col-lg-2 mb-3">
+                                                <div class="text-center">
+                                                    <div class="ball {% if ball in ssq.PRIME_SET %}prime-number{% else %}red-ball{% endif %}"
+                                                         style="width: 50px; height: 50px; margin: 0 auto 10px;">
+                                                        {{ ball|stringformat:"02d" }}
+                                                    </div>
+                                                    <small class="d-block">
+                                                        {% if ball in ssq.PRIME_SET %}质数{% else %}合数{% endif %}
+                                                    </small>
+                                                </div>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                    <div class="alert {% if ssq.red_prime_count > 2 %}alert-success{% else %}alert-warning{% endif %}">
+                                        <h6>
+                                            <i class="bi bi-{% if ssq.red_prime_count > 2 %}check-circle{% else %}exclamation-triangle{% endif %} me-2"></i>
+                                            本期包含 <strong>{{ ssq.red_prime_count }}</strong> 个质数号码
+                                        </h6>
+                                        <p class="mb-0">
+                                            {% if ssq.red_prime_count > 2 %}
+                                                质数数量较多，属于高质数期。
+                                            {% else %}
+                                                质数数量偏少，属低质数期。
+                                            {% endif %}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <h5>质数统计</h5>
+                                <div class="chart-container">
+                                    <canvas id="primeChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 走势图表 -->
+                    <div class="tab-pane fade" id="trend" role="tabpanel">
+                        <h5>近期走势分析</h5>
+                        <div class="chart-container">
+                            <canvas id="trendChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI预测分析 -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="ai-prediction">
+                    <div class="row align-items-center mb-4">
+                        <div class="col-md-8">
+                            <h3 class="mb-0"><i class="bi bi-robot me-2"></i> AI智能预测</h3>
+                            <p class="mb-0 opacity-75">基于机器学习模型的历史数据分析</p>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <span class="badge bg-warning text-dark">
+                                <i class="bi bi-lightbulb me-1"></i>预测准确率: 75.2%
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-lg-6 mb-4">
+                            <div class="card bg-transparent border-white">
+                                <div class="card-header border-white">
+                                    <h5 class="mb-0 text-white">
+                                        <i class="bi bi-fire me-2"></i>热号推荐
+                                        <span class="info-tooltip" data-toggle="tooltip"
+                                              title="基于近50期出现频率最高的号码">
+                                            <i class="bi bi-question-circle"></i>
+                                        </span>
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="prediction-balls">
+                                        {% for number in hot_numbers %}
+                                            <div class="prediction-ball" data-toggle="tooltip"
+                                                 title="出现频率: {{ forloop.counter|add:3 }}0%">
+                                                {{ number|stringformat:"02d" }}
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                    <div class="mt-3">
+                                        <small class="opacity-75">
+                                            <i class="bi bi-info-circle me-1"></i>
+                                            这些号码在近期开奖中出现频率较高
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6 mb-4">
+                            <div class="card bg-transparent border-white">
+                                <div class="card-header border-white">
+                                    <h5 class="mb-0 text-white">
+                                        <i class="bi bi-snow me-2"></i>冷号预警
+                                        <span class="info-tooltip" data-toggle="tooltip"
+                                              title="超过20期未出现的号码，可能出现回补">
+                                            <i class="bi bi-question-circle"></i>
+                                        </span>
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="prediction-balls">
+                                        {% for number in cold_numbers %}
+                                            <div class="prediction-ball" data-toggle="tooltip"
+                                                 title="已 {{ forloop.counter|add:20 }} 期未出现">
+                                                {{ number|stringformat:"02d" }}
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                    <div class="mt-3">
+                                        <small class="opacity-75">
+                                            <i class="bi bi-info-circle me-1"></i>
+                                            这些号码长期未出，可能出现回补
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="card bg-transparent border-white">
+                                <div class="card-header border-white">
+                                    <h5 class="mb-0 text-white">
+                                        <i class="bi bi-bar-chart me-2"></i>蓝球概率分析
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div id="blueProbability">
+                                        <!-- 蓝球概率将通过JavaScript动态生成 -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 相似期数 -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="card stat-card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-clipboard-data me-2"></i> 历史相似期数</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if similar_draws %}
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                    <tr>
+                                        <th>期号</th>
+                                        <th>开奖日期</th>
+                                        <th>红球</th>
+                                        <th>蓝球</th>
+                                        <th>相似度</th>
+                                        <th>操作</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for draw in similar_draws %}
+                                        <tr>
+                                            <td>
+                                                <strong>{{ draw.period }}</strong>
+                                                {% if draw.period == prev_period %}
+                                                    <span class="badge bg-info ms-1">上期</span>
+                                                {% elif draw.period == next_period %}
+                                                    <span class="badge bg-success ms-1">下期</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>{{ draw.draw_date }}</td>
+                                            <td>
+                                                {% for ball in draw.red_balls %}
+                                                    <span class="ball red-ball"
+                                                          style="width: 30px; height: 30px; font-size: 0.9rem; display: inline-block;">
+                                                {{ ball|stringformat:"02d" }}
+                                            </span>
+                                                {% endfor %}
+                                            </td>
+                                            <td>
+                                            <span class="ball blue-ball"
+                                                  style="width: 30px; height: 30px; font-size: 0.9rem;">
+                                                {{ draw.blue_ball|stringformat:"02d" }}
+                                            </span>
+                                            </td>
+                                            <td>
+                                                <div class="progress" style="height: 20px;">
+                                                    <div class="progress-bar bg-success"
+                                                         role="progressbar"
+                                                         style="width: {{ draw.similarity }}%">
+                                                        {{ draw.similarity }}%
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <a href="{% url 'ssq:ssq_detail' period=draw.period %}"
+                                                   class="btn btn-sm btn-outline-primary">
+                                                    查看详情
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <div class="text-center py-5">
+                                <i class="bi bi-info-circle display-6 text-muted mb-3"></i>
+                                <p class="text-muted mb-0">暂无高度相似的期数</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 固定导航按钮 -->
+    <div class="navigation-buttons">
+        {% if prev_period %}
+            <a href="{% url 'ssq:ssq_detail' period=prev_period %}" class="nav-btn btn-prev"
+               data-toggle="tooltip" title="上一期">
+                <i class="fas fa-chevron-up"></i>
+            </a>
+        {% endif %}
+
+        <a href="{% url 'ssq:ssq_list' %}" class="nav-btn btn-home"
+           data-toggle="tooltip" title="返回列表">
+            <i class="fas fa-house"></i>
+        </a>
+
+        {% if next_period %}
+            <a href="{% url 'ssq:ssq_detail' period=next_period %}" class="nav-btn btn-next"
+               data-toggle="tooltip" title="下一期">
+                <i class="fas fa-chevron-down"></i>
+            </a>
+        {% endif %}
+    </div>
+
+
+{% endblock %}

@@ -1,0 +1,325 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block css %}
+    <link rel="stylesheet" href="{% static 'css/ssq/ssq_draw_detail.css' %}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+{% endblock %}
+
+{% block content %}
+    <!-- 页头 -->
+    <div class="header-gradient bg-primary text-white py-4">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="display-6 mb-3">
+                        双色球第 <span class="text-warning">{{ current_period }}</span> 期
+                    </h1>
+                    <p class="lead mb-0">
+                        <i class="fas fa-calendar me-2"></i>
+                        开奖日期：{{ ssq.draw_date }}
+                        <span class="mx-3">|</span>
+                        <i class="fas fa-trophyme-2"></i>
+                        第 {{ ssq.id }} 期/共 {{ total_count }} 期
+                    </p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <div class="btn-group" role="group">
+                        {% if prev_period %}
+                            <a href="{% url 'ssq:ssq_detail' pk=prev_period %}" class="btn btn-outline-light">
+                                <i class="fas fa-chevron-left"></i> 上期
+                            </a>
+                        {% endif %}
+                        <a href="{% url 'ssq:ssq_list' %}" class="btn btn-light">
+                            <i class="fas fa-list"></i> 列表
+                        </a>
+                        {% if next_period %}
+                            <a href="{% url 'ssq:ssq_detail' pk=next_period %}" class="btn btn-outline-light">
+                                下期 <i class="fas fa-chevron-right"></i>
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container py-4">
+
+        <!-- 开奖号码展示 -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow-sm border-0">
+                    <div class="card-header bg-white border-0 py-3">
+                        <h4 class="mb-0"><i class="fas fa-ticket-alt me-2"></i> 开奖号码</h4>
+                    </div>
+                    <div class="card-body py-4">
+                        <div class="d-flex flex-wrap justify-content-center align-items-center">
+                            {% for ball in ssq.red_balls %}
+                                <div class="ball red-ball mx-2 mb-2 position-relative" data-bs-toggle="tooltip" title="红球{{ forloop.counter }}">
+                                    <span>{{ ball|stringformat:"02d" }}</span>
+                                    <div class="ball-label">红{{ forloop.counter }}</div>
+                                </div>
+                            {% endfor %}
+
+                            <div class="plus-sign mx-3">+</div>
+
+                            <div class="ball blue-ball mx-2 mb-2 position-relative" data-bs-toggle="tooltip" title="蓝球">
+                                <span>{{ ssq.blue_ball|stringformat:"02d" }}</span>
+                                <div class="ball-label">蓝球</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 热号和冷号分析 -->
+        <div class="row mb-4">
+            <!-- 热号分析 -->
+            <div class="col-lg-6 mb-4">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-header bg-danger text-white border-0 py-3">
+                        <h5 class="mb-0">
+                            <i class="fas fa-fire me-2"></i> 热号分析
+                            <span class="badge bg-white text-danger ms-2">近{{ hot_stat_range }}期</span>
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        {% if hot_numbers_info %}
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>排名</th>
+                                            <th>号码</th>
+                                            <th>出现次数</th>
+                                            <th>出现频率</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for info in hot_numbers_info %}
+                                            <tr>
+                                                <td><span class="badge bg-danger">#{{ forloop.counter }}</span></td>
+                                                <td>
+                                                    <div class="ball red-ball small-ball d-inline-flex align-items-center justify-content-center">
+                                                        {{ info.number|stringformat:"02d" }}
+                                                    </div>
+                                                </td>
+                                                <td>{{ info.count }}</td>
+                                                <td>
+                                                    <div class="progress" role="progressbar" style="height: 8px;">
+                                                        <div class="progress-bar bg-danger"
+                                                             style="width: {{ info.percentage }}%">
+                                                        </div>
+                                                    </div>
+                                                    <small>{{ info.frequency }}</small>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <div class="text-center py-5">
+                                <i class="bi bi-info-circle display-6 text-muted mb-3"></i>
+                                <p class="text-muted mb-0">暂无热号数据</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- 冷号分析 -->
+            <div class="col-lg-6 mb-4">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-header bg-primary text-white border-0 py-3">
+                        <h5 class="mb-0">
+                            <i class="bi bi-snow me-2"></i> 冷号分析
+                            <span class="badge bg-white text-primary ms-2">近{{ cold_stat_range }}期</span>
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        {% if cold_numbers_info %}
+                            <div class="row g-2 mb-3">
+                                {% for info in cold_numbers_info %}
+                                    <div class="col-3 col-md-2">
+                                        <div class="ball blue-ball position-relative"
+                                             data-bs-toggle="tooltip"
+                                             title="已{{ info.missing_periods }}期未出现{% if info.last_appear != '从未出现' %}，上次出现：第{{ info.last_appear }}期{% endif %}">
+                                            <span>{{ info.number|stringformat:"02d" }}</span>
+                                            <div class="cold-badge position-absolute top-0 start-100 translate-middle badge bg-primary rounded-pill">
+                                                {{ info.missing_periods }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>排名</th>
+                                            <th>号码</th>
+                                            <th>缺失期数</th>
+                                            <th>上次出现</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for info in cold_numbers_info %}
+                                            <tr>
+                                                <td><span class="badge bg-primary">#{{ forloop.counter }}</span></td>
+                                                <td>
+                                                    <div class="ball blue-ball small-ball d-inline-flex align-items-center justify-content-center">
+                                                        {{ info.number|stringformat:"02d" }}
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <span class="me-2">{{ info.missing_periods }}</span>
+                                                        <div class="progress flex-grow-1" style="height: 8px;">
+                                                            <div class="progress-bar bg-primary"
+                                                                 style="width: {% widthratio forloop.counter cold_numbers_info|length 100 %}%">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    {% if info.last_appear == '从未出现' %}
+                                                        <span class="text-muted">从未出现</span>
+                                                    {% else %}
+                                                            第{{ info.last_appear }}期
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <div class="text-center py-5">
+                                <i class="bi bi-info-circle display-6 text-muted mb-3"></i>
+                                <p class="text-muted mb-0">暂无冷号数据</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 历史相似期数 -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow-sm border-0">
+                    <div class="card-header bg-purple text-white border-0 py-3">
+                        <h5 class="mb-0">
+                            <i class="bi bi-clipboard-data me-2"></i> 历史相似期数
+                            <small class="opacity-75">（相似度 ≥ 50%）</small>
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        {% if similar_draws %}
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle">
+                                    <thead>
+                                        <tr class="bg-light">
+                                            <th>排名</th>
+                                            <th>期号</th>
+                                            <th>开奖日期</th>
+                                            <th>红球</th>
+                                            <th>蓝球</th>
+                                            <th>相似度</th>
+                                            <th>相同号码</th>
+                                            <th>操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for draw in similar_draws %}
+                                            <tr>
+                                                <td>
+                                                    <span class="badge {% if forloop.first %}bg-danger{% elif forloop.counter0 < 3 %}bg-warning text-dark{% else %}bg-info{% endif %}">
+                                                        #{{ forloop.counter }}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <strong>{{ draw.period }}</strong>
+                                                    {% if draw.period == prev_period %}
+                                                        <span class="badge bg-info ms-1">上期</span>
+                                                    {% elif draw.period == next_period %}
+                                                        <span class="badge bg-success ms-1">下期</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td>{{ draw.draw_date }}</td>
+                                                <td>
+                                                    <div class="d-flex flex-wrap gap-1">
+                                                        {% for ball in draw.red_balls %}
+                                                            <span class="ball red-ball small-ball">
+                                                                {{ ball|stringformat:"02d" }}
+                                                            </span>
+                                                        {% endfor %}
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <span class="ball blue-ball small-ball">
+                                                        {{ draw.blue_ball|stringformat:"02d" }}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="progress flex-grow-1 me-2" style="height: 20px;">
+                                                            <div class="progress-bar {% if draw.similarity >= 80 %}bg-success{% elif draw.similarity >= 60 %}bg-warning{% else %}bg-info{% endif %}"
+                                                                 role="progressbar"
+                                                                 style="width: {{ draw.similarity }}%">
+                                                            </div>
+                                                        </div>
+                                                        <strong>{{ draw.similarity }}%</strong>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <span class="badge bg-dark">{{ draw.common_count }}个</span>
+                                                </td>
+                                                <td>
+                                                    <a href="{% url 'ssq:ssq_detail' pk=draw.period %}"
+                                                       class="btn btn-sm btn-outline-primary">
+                                                        <i class="fas fa-external-link-alt me-1"></i>查看
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <div class="text-center py-5">
+                                <i class="bi bi-info-circle display-6 text-muted mb-3"></i>
+                                <p class="text-muted mb-0">暂无高度相似的期数（相似度 ≥ 50%）</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        // 初始化工具提示
+        document.addEventListener('DOMContentLoaded', function() {
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl)
+            });
+        });
+
+        // 平滑滚动到顶部
+        document.querySelector('.floating-btn-top').addEventListener('click', function(e) {
+            e.preventDefault();
+            window.scrollTo({top: 0, behavior: 'smooth'});
+        });
+    </script>
+{% endblock %}

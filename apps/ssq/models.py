@@ -100,15 +100,77 @@ class SsqDraw(models.Model):
             # AC值计算
             self.red_ac_value = self._calculate_ac_value(reds)
 
+            #添加特征组分类
+            self._classify_feature_group()
+
     def _calculate_ac_value(self, reds):
         """计算AC值： AC = 组合数 - （最大值-最小值）+ 1 - 重复数（双色球无重复，重复数为0）"""
+        if not isinstance(reds, list) or len(reds) != self.RED_BALL_COUNT:
+            return 0
+
+        try:
+            reds = [int(num) for num in reds]
+            if not all(1 <= num <= 33 for num in reds):
+                return 0
+        except (ValueError, TypeError):
+            return 0
+
+        # 去重复
+        reds = sorted(list(set(reds)))
+
         if len(reds) < 2:
             return 0
+
         # 计算两两差值的个数（去重）
         diffs = set()
         for i in range(len(reds)):
             for j in range(i + 1, len(reds)):
-                diffs.add(reds[j] - reds[i])
-        combination_count = len(diffs)
-        ac_value = combination_count - (reds[-1] - reds[0]) + 1
+                diff = abs(reds[j] - reds[i])
+                if diff > 0:
+                    diffs.add(diff)
+        # 计算AC值
+        ac_value = len(diffs) - (len(reds) - 1)
         return max(ac_value, 0)
+
+    def _classify_feature_group(self):
+        """根据特征自动分类"""
+        if not self.red_balls:
+            self.feature_group = 'normal'
+            return
+
+        # 判断是否异常模式 （全奇数，全偶数）
+        if self.red_odd_count ==0 or self.red_even_count == 0:
+            self.feature_group = 'anomaly'
+        # 判断是否有明显规律 （等差数列，连续号）
+        elif self._has_pattern():
+            self.feature_group = 'pattern'
+        # 判断是否为随机模式（AC在特定范围内）
+        elif 5 <= self.red_ac_value <= 8:
+            self.feature_group = 'random'
+        else:
+            self.feature_group = 'normal'
+
+    def _has_pattern(self):
+        """检测是否有明显规律模式"""
+        reds = sorted(self.red_balls)
+
+        # 检测连续号码
+        consecutive_count = 1
+        max_consecutive = 1
+        for i in range(1, len(reds)):
+            if reds[i] == reds[i-1] + 1:
+                consecutive_count += 1
+                max_consecutive = max(max_consecutive, consecutive_count)
+            else:
+                consecutive_count = 1
+
+        # 如果有3个或者以上连续号码，认为规律
+        if max_consecutive >= 3:
+            return True
+
+        # 检测近似等差数列
+        diffs = [reds[i] - reds[i-1] for i in range(1, len(reds))]
+        if len(set(diffs)) == 1:  # 所有差值相同
+            return True
+        return False
+    

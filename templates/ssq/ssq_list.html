@@ -115,7 +115,8 @@
                         <div class="row g-3 align-items-end">
                             <!-- 新增按钮 -->
                             <div class="col-md-2 col-sm-6">
-                                <a href="{% url 'ssq:ssq_create' %}" class="btn btn-success w-100 btn-icon"> <i class="fas fa-plus-circle"></i>新增记录 </a>
+                                <a href="{% url 'ssq:ssq_create' %}" class="btn btn-success w-100 btn-icon"> <i
+                                        class="fas fa-plus-circle"></i>新增记录 </a>
                             </div>
 
                             <!-- 搜索框 -->
@@ -201,11 +202,12 @@
                                     <th class="text-center" style="width: 8%">蓝球</th>
                                     <th class="text-center" style="width: 8%">奇:偶</th>
                                     <th class="text-center" style="width: 5%">质数</th>
+                                    <th class="text-center" style="width: 5%">AC</th>
                                     <th class="text-center" style="width: 5%">和值</th>
                                     <th class="text-center" style="width: 5%">跨度</th>
                                     <th class="text-center" style="width: 5%">尾和</th>
                                     <th class="text-center">三区分布</th>
-                                    <th class="text-center" style="width: 18%">操作</th>
+                                    <th class="text-center" style="width: 12%">操作</th>
                                 </tr>
                                 </thead>
                                 <tbody id="ssq-tbody">
@@ -248,6 +250,9 @@
                                                 {{ item.red_prime_count }}
                                             </td>
                                             <td class="text-center align-middle">
+                                                {{ item.red_ac_value }}
+                                            </td>
+                                            <td class="text-center align-middle">
                                                 {{ item.red_sum }}
                                             </td>
                                             <td class="text-center align-middle">
@@ -262,16 +267,14 @@
                                             </td>
                                             <td class="text-center align-middle">
                                                 <div class="btn-group" role="group">
-                                                    <a class="btn btn-sm btn-info btn-sm btn-action" href="#">
+                                                    <a class="btn btn-sm btn-info btn-sm btn-action"
+                                                       href="{% url 'ssq:ssq_detail' item.id %}">
                                                         <i class="fas fa-list mr-1"></i>详情
                                                     </a>
-                                                    <a class="btn btn-sm btn-outline-primary" href="{% url 'ssq:ssq_update' item.id %}">
+                                                    <a class="btn btn-sm btn-outline-primary"
+                                                       href="{% url 'ssq:ssq_update' item.id %}">
                                                         <i class="fas fa-edit mr-1"></i>编辑
                                                     </a>
-                                                    <button class="btn btn-sm btn-outline-danger delete-btn btn-action"
-                                                            data-period="${record.period}">
-                                                        <i class="fas fa-trash-alt mr-1"></i>删除
-                                                    </button>
                                                 </div>
                                             </td>
                                         </tr>
@@ -282,7 +285,8 @@
                                             <div class="d-flex flex-column align-items-center justify-content-center">
                                                 <i class="bi bi-inbox fa-3x text-muted mb-3"></i>
                                                 <p class="text-muted mb-3">暂无数据</p>
-                                                <button class="btn btn-primary btn-icon mt-2" data-bs-toggle="modal" data-bs-target="#createModal">
+                                                <button class="btn btn-primary btn-icon mt-2" data-bs-toggle="modal"
+                                                        data-bs-target="#createModal">
                                                     <i class="bi bi-plus-circle"></i>添加第一条记录
                                                 </button>
                                             </div>
@@ -310,7 +314,4 @@
             </div>
         </div>
     </div>
-{% endblock %}
-
-{% block js %}
 {% endblock %}

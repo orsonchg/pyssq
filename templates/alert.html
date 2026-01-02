@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %} 信息提示 {% endblock %}
+
+{% block content %}
+<!-- 容器包裹，优化页面边距 -->
+<div class="container py-5">
+    <!-- 页面标题 -->
+    <h2 class="mb-4 fw-bold">信息提示</h2>
+
+    <!-- 主要内容行 -->
+    <div class="row justify-content-center">
+        <form method="post" class="col-12 col-md-8 col-lg-6">
+            {% csrf_token %}
+
+            <!-- 警告提示框 -->
+            <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <strong>警告！</strong> 删除后将不可恢复，请确认是否删除？
+            </div>
+
+            <!-- 按钮组 -->
+            <div class="d-flex gap-3 justify-content-start">
+                <a href="{{ cancel }}" class="btn btn-secondary px-4 py-2">
+                    <i class="fas fa-xmark-circle me-1"></i> 取消
+                </a>
+                <button type="submit" class="btn btn-danger px-4 py-2">
+                    <i class="fas fa-trash me-1"></i> 确认删除
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

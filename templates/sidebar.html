@@ -20,7 +20,7 @@
             </li>
             <li class="nav-item">
                 <a class="nav-link {% if request.resolver_match.url_name == 'features_list' %}active{% endif %}"
-                   href="#">
+                   href="{% url 'ai_models:features_list' %}">
                     <i class="fas fa-list"></i> 特征列表
                 </a>
             </li>

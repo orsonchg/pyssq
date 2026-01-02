@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+
+{% block title %}特征列表{% endblock %}
+
+{% block content %}
+<!-- 主容器 - 增加响应式内边距 -->
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <!-- 页面标题区域 - 优化间距和响应式 -->
+            <div class="page-header mb-5">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                    <div>
+                        <h2 class="mb-2 fw-bold">
+                            <i class="fas fa-database text-primary me-2"></i>特征数据集管理
+                        </h2>
+                        <p class="text-muted mb-0">管理用于机器学习的特征数据集</p>
+                    </div>
+                    <div>
+                        <a class="btn btn-success btn-lg px-4 py-2" href="{% url 'ai_models:features_create' %}" >
+                            <i class="fas fa-plus-circle me-2"></i>生成特征集
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 特征集列表卡片 - 优化阴影和圆角 -->
+            <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+                <div class="card-header bg-white border-bottom border-secondary border-opacity-10 py-4">
+                    <h5 class="mb-0 fw-semibold">
+                        <i class="fas fa-list me-2 text-primary"></i>特征数据集列表
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    <!-- 表格容器 - 优化内边距 -->
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0" id="features-table">
+                            <thead class="table-light">
+                            <tr>
+                                <th class="px-4 py-3 fw-semibold text-secondary" style="width: 60px;">ID</th>
+                                <th class="px-4 py-3 fw-semibold text-secondary">名称</th>
+                                <th class="px-4 py-3 fw-semibold text-secondary">描述</th>
+                                <th class="px-4 py-3 fw-semibold text-secondary">期号范围</th>
+                                <th class="px-4 py-3 fw-semibold text-secondary">特征列</th>
+                                <th class="px-4 py-3 fw-semibold text-secondary">目标列</th>
+                                <th class="px-4 py-3 fw-semibold text-secondary" style="width: 100px;">样本数</th>
+                                <th class="px-4 py-3 fw-semibold text-secondary" style="width: 180px;">操作</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% if features %}
+                                {% for row in features %}
+                                    <tr class="border-bottom border-secondary border-opacity-10">
+                                        <td class="px-4 py-3">{{ row.id }}</td>
+                                        <td class="px-4 py-3 fw-medium">{{ row.name }}</td>
+                                        <td class="px-4 py-3 text-muted">
+                                            {{ row.description|default:"无描述" }}
+                                        </td>
+                                        <td class="px-4 py-3">
+                                            <span class="badge bg-primary-subtle text-primary fw-normal px-2 py-1">{{ row.period_start }}</span>
+                                            <i class="fas fa-arrow-right mx-2 text-muted"></i>
+                                            <span class="badge bg-primary-subtle text-primary fw-normal px-2 py-1">{{ row.period_end }}</span>
+                                        </td>
+                                        <td class="px-4 py-3 feature-column text-truncate" style="max-width: 200px;"
+                                            data-bs-toggle="tooltip" data-bs-title="{{ row.feature_columns }}">
+                                            {{ row.feature_columns }}
+                                        </td>
+                                        <td class="px-4 py-3 feature-column text-truncate" style="max-width: 150px;"
+                                            data-bs-toggle="tooltip" data-bs-title="{{ row.target_columns }}">
+                                            {{ row.target_columns }}
+                                        </td>
+                                        <td class="px-4 py-3">
+                                            <span class="badge bg-info-subtle text-info fw-normal px-2 py-1">{{ row.sample_count }}</span>
+                                        </td>
+                                        <td class="px-4 py-3">
+                                            <div class="btn-group btn-group-sm gap-1">
+                                                <a href="{% url 'ai_models:features_detail' row.id %}" class="btn btn-outline-primary" title="详情">
+                                                    <i class="fas fa-info-circle me-1"></i>详情
+                                                </a>
+                                                <a href="{% url 'ai_models:features_delete' row.id %}" class="btn btn-outline-danger" title="删除">
+                                                    <i class="fas fa-trash me-1"></i>删除
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            {% else %}
+                                <!-- 空状态提示 -->
+                                <tr>
+                                    <td colspan="9" class="px-4 py-5 text-center text-muted">
+                                        <div class="py-5">
+                                            <i class="fas fa-folder-open text-secondary fs-3 mb-3"></i>
+                                            <p class="mb-0">暂无特征数据集，请点击"生成特征集"创建</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 初始化tooltip -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+    })
+});
+</script>
+{% endblock %}
