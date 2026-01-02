@@ -1,0 +1,417 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }} - 双色球AI预测系统</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="{% static 'plugins/bootstrap5/css/bootstrap.min.css' %}" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="{% static 'plugins/fontawesome/css/all.min.css' %}">
+
+    <style>
+        /* 1. 优先定义CSS变量（必须在:root中，确保全局可访问） */
+        :root {
+            /* 主色调 - 可根据需求修改 */
+            --primary-color: #e74c3c; /* 浅红 */
+            --primary-dark: #c0392b; /* 深红 */
+            --dark-color: #2c3e50; /* 深色文本 */
+            /* 阴影变量 */
+            --shadow-sm: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.1);
+            /* 备用方案：如果变量失效，使用固定值 */
+            --fallback-primary: #e74c3c;
+            --fallback-primary-dark: #c0392b;
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 420px;
+            padding: 0 15px;
+            margin: 0 auto;
+        }
+
+        .login-card {
+            background: #fff;
+            max-width: 600px;
+        }
+
+        .login-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(50, 50, 93, 0.15), 0 10px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 登录头部 */
+        .login-header {
+            /* 增加备用值，防止变量失效 */
+            background: linear-gradient(135deg, var(--primary-color, var(--fallback-primary)) 0%, var(--primary-dark, var(--fallback-primary-dark)) 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .login-logo {
+            font-size: 2.8rem;
+            margin-bottom: 0.8rem;
+            opacity: 0.95;
+        }
+
+        .login-header h2 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .login-header p {
+            font-size: 0.95rem;
+            opacity: 0.9;
+            margin-bottom: 0;
+        }
+
+        /* 登录主体 */
+        .login-body {
+            padding: 2rem;
+        }
+
+        /* 表单样式优化 - 适配Bootstrap 5 */
+        .form-floating {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-control {
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 0.85rem 1rem;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+            height: auto;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-color, var(--fallback-primary));
+            box-shadow: 0 0 0 0.2rem rgba(231, 76, 60, 0.25);
+            outline: none;
+        }
+
+        .form-control::placeholder {
+            color: #adb5bd;
+            font-size: 0.9rem;
+        }
+
+        /* 复选框样式 - Bootstrap 5 新版API */
+        .form-check-input {
+            border-radius: 5px;
+            border-color: #ced4da;
+            width: 1.2em;
+            height: 1.2em;
+        }
+
+        .form-check-input:checked {
+            background-color: var(--primary-color, var(--fallback-primary));
+            border-color: var(--primary-color, var(--fallback-primary));
+        }
+
+        .form-check-input:focus {
+            box-shadow: 0 0 0 0.2rem rgba(231, 76, 60, 0.25);
+        }
+
+        /* 按钮样式优化 */
+        .btn {
+            font-weight: 600;
+            padding: 0.75rem 1.25rem;
+            border-radius: 10px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color, var(--fallback-primary)) 0%, var(--primary-dark, var(--fallback-primary-dark)) 100%);
+            border: none;
+            box-shadow: var(--shadow-sm, 0 4px 6px rgba(0, 0, 0, 0.1));
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(231, 76, 60, 0.3);
+            background: linear-gradient(135deg, var(--primary-dark, var(--fallback-primary-dark)) 0%, var(--primary-color, var(--fallback-primary)) 100%);
+        }
+
+        .btn-outline-primary {
+            color: var(--primary-color, var(--fallback-primary));
+            border-color: var(--primary-color, var(--fallback-primary));
+            border-width: 2px;
+            margin-top: 10px;
+        }
+
+        .btn-outline-primary:hover {
+            background: var(--primary-color, var(--fallback-primary));
+            border-color: var(--primary-color, var(--fallback-primary));
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm, 0 4px 6px rgba(0, 0, 0, 0.1));
+        }
+
+        /* 提示信息样式 */
+        .custom-alert {
+            border-radius: 12px;
+            border: none;
+            box-shadow: var(--shadow-sm, 0 4px 12px rgba(0, 0, 0, 0.08));
+            padding: 1rem 1.25rem;
+            margin-bottom: 1.8rem;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .custom-alert .alert-icon {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        /* 提示文本 */
+        .custom-alert .alert-message {
+            font-size: 0.95rem;
+            line-height: 1.5;
+            font-weight: 400;
+        }
+
+        /* 链接样式 */
+        .forgot-password {
+            color: var(--primary-color, var(--fallback-primary));
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.2s ease;
+        }
+
+        .forgot-password:hover {
+            color: var(--primary-dark, var(--fallback-primary-dark));
+            text-decoration: underline;
+        }
+
+        /* 登录页脚 */
+        .login-footer {
+            text-align: center;
+            padding: 1.5rem;
+            border-top: 1px solid #e9ecef;
+            background: #f8f9fa;
+        }
+
+        .login-footer p {
+            margin-bottom: 1rem;
+            color: #6c757d;
+            font-size: 0.95rem;
+        }
+
+        /* 版权信息 */
+        .copyright {
+            text-align: center;
+            margin-top: 2rem;
+            color: #6c757d;
+            font-size: 0.85rem;
+        }
+
+        .copyright a {
+            color: #495057;
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .copyright a:hover {
+            color: var(--primary-color, var(--fallback-primary));
+            text-decoration: underline;
+        }
+
+        /* 加载状态动画 */
+        .btn-loading {
+            position: relative;
+            pointer-events: none;
+        }
+
+        .btn-loading::after {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            margin: auto;
+            border: 2px solid transparent;
+            border-top-color: #ffffff;
+            border-radius: 50%;
+            animation: btn-loading-spinner 1s ease infinite;
+        }
+
+
+    </style>
+</head>
+<body>
+<div class="login-container">
+    <div class="card login-card">
+        <div class="login-header">
+            <div class="login-logo">
+                <i class="fas fa-chart-line"></i>
+            </div>
+            <h2 class="mb-1">双色球AI预测系统</h2>
+            <p>智能分析，科学预测</p>
+        </div>
+        <!--主体-->
+        <div class="login-body">
+
+            <!--提示信息-->
+            <div id="alert-box"></div>
+
+            {% if form.errors %}
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    用户名或者密码错误，请重试。
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endif %}
+
+            <!--登录表单-->
+            <form id="loginForm" action="#" method="post" novalidate>
+                {% csrf_token %}
+
+                <!-- 用户名/邮箱 - 使用Bootstrap 5浮动标签 -->
+                <div class="form-floating">
+                    <input type="text" name="username" id="id_username"
+                           class="form-control" placeholder="请输入用户名或邮箱" required autofocus>
+                    <label for="id_username"><i class="fas fa-user me-2"></i>用户名或邮箱</label>
+                </div>
+
+                <!-- 密码 - 使用Bootstrap 5浮动标签 -->
+                <div class="form-floating">
+                    <input type="password" name="password" id="id_password"
+                           class="form-control" placeholder="请输入密码" required>
+                    <label for="id_password"><i class="fas fa-lock me-2"></i>密码</label>
+                </div>
+
+                <div class="form-check mb-4">
+                    <input type="checkbox" class="form-check-input"
+                           id="remember_me" name="remember_me">
+                    <label class="form-check-label" for="remember_me">
+                        记住我 (7天内免登录)
+                    </label>
+                </div>
+
+                <!-- 提交按钮 -->
+                <div class="d-grid gap-2 mb-4">
+                    <button type="submit" id="loginBtn" class="btn btn-primary">
+                        <i class="fas fa-sign-in-alt me-2"></i>登录系统
+                    </button>
+                </div>
+
+                <div class="text-center mb-4">
+                    <a href="#" class="forgot-password">
+                        <i class="fas fa-question-circle me-1"></i>忘记密码？
+                    </a>
+                </div>
+
+            </form>
+
+        </div>
+
+        <!--底部-->
+        <div class="login-footer">
+            <div class="login-footer">
+                <p class="mb-2 mb-md-0">还没有账号？</p>
+                <a href="{% url 'accounts:register' %}" class="btn btn-outline-primary">
+                    <i class="fas fa-user-plus me-2"></i>立即注册
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 版权信息 -->
+    <div class="copyright mt-4">
+        <p class="mb-1">
+            &copy; 2025 双色球AI预测系统 - 保留所有权利
+        </p>
+        <p class="small">
+            <a href="#" class="me-3">隐私政策</a>
+            <a href="#" class="ms-3">使用条款</a>
+        </p>
+    </div>
+
+
+</div>
+
+<!-- Bootstrap JS 依赖 -->
+<script src="{% static 'plugins/jquery/js/jquery-3.7.1.min.js' %}"></script>
+<script src="{% static 'plugins/bootstrap5/js/bootstrap.bundle.min.js' %}"></script>
+
+<script>
+
+const form = document.getElementById('loginForm');
+const loginBtn = document.getElementById('loginBtn');
+
+form.addEventListener('submit', function(e){
+    e.preventDefault();
+
+    loginBtn.classList.add('btn-loading');
+    loginBtn.disabled = true;
+
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+    const data = {
+        username: form.username.value,
+        password: form.password.value,
+        remember_me: form.remember_me.checked,
+    };
+    if (!data.username || !data.password) {
+        showAlert('请输入用户名和密码', 'warning');
+        loginBtn.disabled = false;
+        loginBtn.classList.remove('btn-loading');
+        return;
+    }
+
+    fetch("{% url 'accounts:login' %}", {
+        method: "POST",
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken,
+            'X-Requested-With': 'XMLHttpRequest',
+        },
+        body: JSON.stringify(data),
+    })
+    .then(async response => {
+        const res = await response.json();
+
+        if (!response.ok) {
+            if (response.status === 429) {
+                showAlert('登录失败次数过多，请稍后再试', 'warning');
+            } else {
+                showAlert(res.message || '用户名或者密码错误', 'danger');
+            }
+            return;
+        }
+
+        window.location.href = res.redirect_url;
+    })
+    .catch(() =>{
+        showAlert('服务器错误，请稍后再试', 'danger');
+    })
+    .finally(() => {
+        loginBtn.classList.remove('btn-loading');
+        loginBtn.disabled = false;
+    });
+});
+
+function showAlert(message, type) {
+    document.getElementById('alert-box').innerHTML = `
+        <div class="alert alert-${type} alert-dismissible fade show">
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    `;
+}
+</script>
+
+</body>
+</html>

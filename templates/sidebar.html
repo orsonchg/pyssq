@@ -1,0 +1,171 @@
+<div class="col-md-3 col-lg-2 sidebar d-none d-md-block">
+    <div class="sidebar-sticky">
+        <div class="text-center mb-4">
+            <h5 class="font-weight-bold">预测系统</h5>
+            <small class="text-muted">智能分析 科学预测</small>
+        </div>
+
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}"
+                   href="#">
+                    <i class="fas fa-tachometer-alt"></i> 仪表板
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if request.resolver_match.url_name == 'ssq_list' %}active{% endif %}"
+                   href="{% url 'ssq:ssq_list' %}">
+                    <i class="fas fa-list"></i> 双色球列表
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if request.resolver_match.url_name == 'features_list' %}active{% endif %}"
+                   href="#">
+                    <i class="fas fa-list"></i> 特征列表
+                </a>
+            </li>
+
+
+            <li class="nav-item">
+                <a class="nav-link {% if request.resolver_match.url_name == 'analysis_trend' %}active{% endif %}"
+                   href="#">
+                    <i class="fas fa-brain"></i> 走势分析
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link {% if request.resolver_match.url_name == 'analysis_frequency' %}active{% endif %}"
+                   href="#">
+                    <i class="fas fa-brain"></i> 号码频率
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link {% if request.resolver_match.url_name == 'models_list' %}active{% endif %}"
+                   href="#">
+                    <i class="fas fa-brain"></i> 模型列表
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link {% if request.resolver_match.url_name == 'prediction_list' %}active{% endif %}"
+                   href="#">
+                    <i class="fas fa-futbol-ball"></i> 预测分析
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if request.resolver_match.url_name == 'backtest' %}active{% endif %}"
+                   href="#">
+                    <i class="fas fa-chart-bar"></i> 回测验证
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if request.resolver_match.url_name == 'analytics' %}active{% endif %}"
+                   href="#">
+                    <i class="fas fa-chart-pie"></i> 统计分析
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link {% if request.resolver_match.url_name == 'ai-feature-set-list' %}active{% endif %}"
+                   href="#">
+                    <i class="fas fa-chart-pie"></i> AI特征集管理
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if request.resolver_match.url_name == 'ai-training-task-list' %}active{% endif %}"
+                   href="#">
+                    <i class="fas fa-chart-pie"></i> AI训练任务管理
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link {% if request.resolver_match.url_name == 'ai-model-list' %}active{% endif %}"
+                   href="#">
+                    <i class="fas fa-chart-pie"></i> AI所有模型
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link {% if request.resolver_match.url_name == 'transformer-model-list' %}active{% endif %}"
+                   href="#">
+                    <i class="fas fa-chart-pie"></i> Transformer模型
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if request.resolver_match.url_name == 'ensemble-model-list' %}active{% endif %}"
+                   href="#">
+                    <i class="fas fa-chart-pie"></i> 集成模型
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link {% if request.resolver_match.url_name == 'advanced-prediction-page' %}active{% endif %}"
+                   href="#">
+                    <i class="fas fa-chart-pie"></i> 高级预测
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if request.resolver_match.url_name == 'model-comparison-page' %}active{% endif %}"
+                   href="#">
+                    <i class="fas fa-chart-pie"></i> 模型对比
+                </a>
+            </li>
+
+            <div class="sidebar-divider my-4 mx-3"></div>
+            <li class="nav-item">
+                <h6 class="sidebar-heading px-3 text-uppercase text-muted mb-2">数据分析</h6>
+                <a class="nav-link" href="#">
+                    <i class="fas fa-chart-bar mr-2"></i> 统计分析
+                </a>
+                <a class="nav-link" href="#">
+                    <i class="fas fa-history mr-2"></i> 历史记录
+                </a>
+                <a class="nav-link" href="#">
+                    <i class="fas fa-award mr-2"></i> 获奖统计
+                </a>
+            </li>
+
+            <div class="sidebar-divider my-4 mx-3"></div>
+            <li class="nav-item">
+                <h6 class="sidebar-heading px-3 text-uppercase text-muted mb-2">用户管理</h6>
+                <a class="nav-link" href="#" target="_blank">
+                    <i class="fas fa-cogs"></i> 后台管理
+                </a>
+
+                <a class="nav-link" href="#">
+                    <i class="fas fa-sliders-h mr-2"></i> 系统设置
+                </a>
+            </li>
+
+            <div class="sidebar-divider my-4 mx-3"></div>
+            <li class="nav-item">
+                <h6 class="sidebar-heading px-3 text-uppercase text-muted mb-2">系统管理</h6>
+                <a class="nav-link" href="#" target="_blank">
+                    <i class="fas fa-cogs"></i> 后台管理
+                </a>
+
+                <a class="nav-link" href="#">
+                    <i class="fas fa-sliders-h mr-2"></i> 系统设置
+                </a>
+            </li>
+        </ul>
+
+        <div class="mt-4">
+            <h6 class="text-uppercase text-muted mb-3" style="color:#f7f7f7 !important;">快捷操作</h6>
+            <button class="btn btn-outline-light btn-sm btn-block mb-2" onclick="updateDraws()">
+                <i class="fas fa-sync-alt"></i> 更新数据
+            </button>
+            <button class="btn btn-outline-light btn-sm btn-block mb-2" onclick="dailyPrediction()">
+                <i class="fas fa-bolt"></i> 一键预测
+            </button>
+            <button class="btn btn-outline-light btn-sm btn-block" onclick="showHelp()">
+                <i class="fas fa-question-circle"></i> 使用帮助
+            </button>
+        </div>
+
+        <div class="mt-5">
+            <small class="text-muted">版本: v1.0.0</small>
+        </div>
+    </div>
+</div>

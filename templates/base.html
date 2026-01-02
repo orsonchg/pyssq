@@ -1,0 +1,243 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="双色球AI智能预测系统">
+    <meta name="author" content="Lottery AI">
+
+    <title>{% block title %}双色球AI预测系统{% endblock %}</title>
+
+    <!-- Bootstrap 4.0 CSS -->
+    <link rel="stylesheet" href="{% static 'plugins/bootstrap5/css/bootstrap.min.css' %}">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="{% static 'plugins/fontawesome/css/all.min.css' %}">
+    <!-- Chart.js -->
+    <link rel="stylesheet" href="{% static 'plugins/chart/css/Chart.min.css' %}">
+    <link rel="stylesheet" href="{% static 'plugins/sweetalert2/css/sweetalert2.min.css' %}">
+    <link rel="stylesheet" href="{% static 'plugins/select2/css/select2.min.css' %}">
+    <link rel="stylesheet" href="{% static 'plugins/bootstrap-datepicker/css/bootstrap-datepicker.min.css' %}">
+
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <!-- Custom styles -->
+    <style>
+        :root {
+            --primary-color: #e74c3c;
+            --secondary-color: #3498db;
+            --success-color: #2ecc71;
+            --warning-color: #f39c12;
+            --danger-color: #e74c3c;
+            --dark-color: #2c3e50;
+            --light-color: #ecf0f1;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', 'Segoe UI', sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+    </style>
+
+    {% block css %}{% endblock %}
+</head>
+<body>
+<!-- 导航栏 -->
+{% include 'nav.html' %}
+
+<div class="container-fluid">
+    <div class="row">
+        <!-- 侧边栏 -->
+        {% include 'sidebar.html' %}
+
+        <!-- 主要内容区域 -->
+        <div class="col-md-9 col-lg-10 main-content">
+            {% if messages %}
+                <div class="messages">
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="close" data-dismiss="alert">
+                                <span>&times;</span>
+                            </button>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            {% block content %}
+
+            {% endblock %}
+        </div>
+    </div>
+</div>
+
+<!-- 加载模态框 -->
+<div class="modal fade" id="loadingModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-body text-center py-4">
+                <div class="spinner-border text-primary mb-3" role="status">
+                    <span class="sr-only">加载中...</span>
+                </div>
+                <h5>处理中...</h5>
+                <p class="text-muted mb-0">请稍候</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 任务进度模态框 -->
+<div class="modal fade" id="taskProgressModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">任务执行中</h5>
+            </div>
+            <div class="modal-body">
+                <div class="progress">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated"
+                         role="progressbar" style="width: 100%"></div>
+                </div>
+                <p class="text-center mt-3 mb-0">正在执行任务，请稍候...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 页脚 -->
+{% include 'footer.html' %}
+
+<!-- Bootstrap JS 依赖 -->
+<script src="{% static 'plugins/jquery/js/jquery-3.7.1.min.js' %}"></script>
+<script src="{% static 'plugins/popper/js/popper.min.js' %}"></script>
+<script src="{% static 'plugins/bootstrap5/js/bootstrap.bundle.min.js' %}"></script>
+
+<!-- 其他JS库 -->
+<script src="{% static 'plugins/chart/js/Chart.min.js' %}"></script>
+<script src="{% static 'plugins/sweetalert2/js/sweetalert2.all.min.js' %}"></script>
+
+<!-- 自定义JS -->
+<script>
+
+        // 手动初始化下拉菜单
+        {#$('.dropdown-toggle').dropdown();#}
+
+        // 确保导航栏折叠正常
+        $('.navbar-toggler').on('click', function () {
+            $('#navbarSupportedContent').collapse('toggle');
+        });
+
+        // 显示当前时间
+        function updateTime() {
+            const now = new Date();
+            const timeString = now.toLocaleString('zh-CN', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false
+            });
+            document.getElementById('current-time').textContent = timeString;
+        }
+
+        // 初始化时间显示
+        updateTime();
+        setInterval(updateTime, 1000);
+
+        // 全局AJAX设置
+        $.ajaxSetup({
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            beforeSend: function () {
+                // 显示加载提示
+                $('#loadingModal').modal('show');
+            },
+            complete: function () {
+                // 隐藏加载提示
+                $('#loadingModal').modal('hide');
+            }
+        });
+
+
+        // 显示帮助
+        function showHelp() {
+            Swal.fire({
+                title: '使用帮助',
+                html: `
+                    <div class="text-left">
+                        <h6>系统功能说明：</h6>
+                        <ul>
+                            <li><strong>仪表板</strong>：查看系统概览和统计数据</li>
+                            <li><strong>模型训练</strong>：训练新的预测模型</li>
+                            <li><strong>预测分析</strong>：进行下一期号码预测</li>
+                            <li><strong>回测验证</strong>：验证模型的历史表现</li>
+                            <li><strong>统计分析</strong>：分析开奖规律和模型性能</li>
+                        </ul>
+                        <hr>
+                        <small class="text-muted">如需更多帮助，请联系系统管理员。</small>
+                    </div>
+                `,
+                icon: 'info',
+                width: 600
+            });
+        }
+
+        // 格式化数字
+        function formatNumber(num) {
+            if (num >= 10000) {
+                return (num / 10000).toFixed(1) + '万';
+            }
+            return num.toLocaleString();
+        }
+
+        // 格式化日期
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('zh-CN');
+        }
+
+        // 初始化工具提示
+        $(function () {
+            $('[data-toggle="tooltip"]').tooltip();
+            $('[data-toggle="popover"]').popover();
+        });
+
+        // 初始化DataTables
+        function initDataTable(tableId, options = {}) {
+            const defaultOptions = {
+                language: {
+                    url: "//cdn.datatables.net/plug-ins/1.10.25/i18n/Chinese.json"
+                },
+                responsive: true,
+                autoWidth: false,
+                pageLength: 10,
+                order: [[0, 'desc']]
+            };
+
+            const finalOptions = {...defaultOptions, ...options};
+            return $(tableId).DataTable(finalOptions);
+        }
+
+        // 创建彩票球显示
+        function createBalls(redBalls, blueBall) {
+            let html = '';
+            if (redBalls && redBalls.length) {
+                redBalls.forEach(ball => {
+                    html += `<span class="lottery-ball red-ball">${ball}</span>`;
+                });
+            }
+            if (blueBall) {
+                html += `<span class="lottery-ball blue-ball">${blueBall}</span>`;
+            }
+            return html;
+        }
+
+</script>
+
+{% block js %}{% endblock %}
+</body>
+</html>
